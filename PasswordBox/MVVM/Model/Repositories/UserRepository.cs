@@ -4,6 +4,7 @@ using PasswordBox.Interfaces.Repositories;
 using PasswordBox.MVVM.Model.AppContext;
 using PasswordBox.MVVM.Model.Entities;
 using PasswordBox.MVVM.Model.EventArgs;
+using System.Linq.Expressions;
 
 namespace PasswordBox.MVVM.Model.Repositories
 {
@@ -28,6 +29,11 @@ namespace PasswordBox.MVVM.Model.Repositories
             await _dbContext.SaveChangesAsync();
 
             OnDataChanged?.Invoke(new(ActionWithData.Add, entity));
+        }
+
+        public async Task<User?> GetByAsync(Expression<Func<User, bool>> expression)
+        {
+            return await _dbContext.Users.FirstOrDefaultAsync(expression);
         }
 
         public void Dispose()
