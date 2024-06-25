@@ -7,5 +7,6 @@ namespace PasswordBox.Interfaces.Repositories
         IRepositoryAdd<User>,
         IRepositoryGetAll<User>,
         IRepositoryDataChangedEvent<User>,
+        IRepositoryGetBy<User>,
         IDisposable { }
 }
