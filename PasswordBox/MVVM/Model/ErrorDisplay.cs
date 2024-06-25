@@ -1,5 +1,6 @@
 ﻿using FluentValidation.Results;
 using System.Text;
+using System.Windows;
 
 namespace PasswordBox.MVVM.Model
 {
@@ -14,7 +15,7 @@ namespace PasswordBox.MVVM.Model
                 errorMsg.Append(error.ErrorMessage + "\n");
             }
 
-            Messagebox.Show(errorMsg.ToString());
+            MessageBox.Show(errorMsg.ToString());
         }
     }
 }
