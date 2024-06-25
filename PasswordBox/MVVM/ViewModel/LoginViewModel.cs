@@ -1,5 +1,7 @@
 ﻿using PasswordBox.Core;
 using PasswordBox.MVVM.Model;
+using PasswordBox.MVVM.Model.Entities;
+using PasswordBox.MVVM.Model.Validators;
 using PasswordBox.Services;
 using System.Windows;
 using System.Windows.Input;
@@ -8,11 +10,14 @@ namespace PasswordBox.MVVM.ViewModel
 {
     internal class LoginViewModel : Core.ViewModel
     {
+        private UserLoginValidator _userValidator;
+
         public LoginViewModel(INavigationService navigation)
         {
             Navigation = navigation;
+            _userValidator = new UserLoginValidator();
 
-            ContinueCommand = new RelayCommand(Continue);
+            LoginCommand = new RelayCommand(LogIn);
             NavigateToRegistrationCommand = new RelayCommand(NavigateToRegistration);
         }
 
@@ -43,14 +48,18 @@ namespace PasswordBox.MVVM.ViewModel
 
         #region Commands
 
-        public ICommand ContinueCommand { get; set; }
+        public ICommand LoginCommand { get; set; }
         public ICommand NavigateToRegistrationCommand { get; set; }
 
-        private void Continue(object obj)
+        private async void LogIn(object obj)
         {
-            if (string.IsNullOrEmpty(Login))
+            // Валидация пользователя (проверка на правильность ввода полей
+            // и на существование пользователя)
+            User user = new(Login);
+            var result = await _userValidator.ValidateAsync(user);
+            if (!result.IsValid)
             {
-                MessageBox.Show("Enter login.");
+                ErrorDisplay.ShowValidationErrorMessage(result.Errors);
                 return;
             }
 
@@ -60,13 +69,15 @@ namespace PasswordBox.MVVM.ViewModel
                 return;
             }
 
+            // Валидация Two Factor Code
             GoogleAuth googleAuth = new();
             if(!googleAuth.Validate(Login, TwoFactorCode))
             {
-                MessageBox.Show("Invalid Login or Two factor code.");
+                MessageBox.Show("Invalid two factor code.");
                 return;
             }
 
+            // Перенаправление на страницу с паролями и отправка уведомления
             Navigation.NavigateTo<PasswordsViewModel>();
             NotificationService.SendWelcomeNotification(Login);
         }
