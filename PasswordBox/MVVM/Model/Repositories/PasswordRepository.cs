@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PasswordBox.Enums;
-using PasswordBox.Interfaces.Repositories.Base;
+using PasswordBox.Interfaces.Repositories;
 using PasswordBox.MVVM.Model.AppContext;
 using PasswordBox.MVVM.Model.Entities;
 using PasswordBox.MVVM.Model.EventArgs;
@@ -8,7 +8,7 @@ using System.Linq.Expressions;
 
 namespace PasswordBox.MVVM.Model.Repositories
 {
-    internal class PasswordRepository : IRepository<Password>, IDisposable
+    internal class PasswordRepository : IPasswordRepository
     {
         private readonly ApplicationContext _dbContext;
 

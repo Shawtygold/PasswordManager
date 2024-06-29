@@ -9,7 +9,8 @@ namespace PasswordBox.Interfaces.Repositories
         IRepositoryUpdate<Password>,
         IRepositoryDelete<Password>,
         IRepositoryDataChangedEvent<Password>,
-        IRepositoryGetBy<Password>
+        IRepositoryGetBy<Password>,
+        IDisposable
     {
     }
 }
