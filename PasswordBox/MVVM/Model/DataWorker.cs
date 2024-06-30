@@ -4,24 +4,6 @@ namespace PasswordBox.MVVM.Model
 {
     class DataWorker
     {
-        //получение сообщения о том, как прошло действие(добавление/редактирование/удаление)  Например: "Пароль успешно добавлен!"
-        //internal static string GetMessageAboutActionWithThePassword(bool wasTheAction, string msgTrue, string msgFalse)
-        //{
-        //    string message;
-
-        //    если действие было совершено успешно
-        //    if (wasTheAction == true)
-        //    {
-        //        message = msgTrue;
-        //    }
-        //    else
-        //    {
-        //        message = msgFalse;
-        //    }
-
-        //    return message;
-        //}
-
         //метод получающий изображение
         internal static string GetImage()
         {
