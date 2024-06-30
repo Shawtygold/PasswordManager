@@ -163,7 +163,7 @@
                     Width="290"
                     Height="38"/>
 
-            <!--Registration button-->
+            <!--Navigate to registration button-->
             <Button Command="{Binding NavigateToRegistrationCommand}"
                     Content="Do not have account? Register"
                     Background="Transparent" BorderThickness="0" 

@@ -11,7 +11,7 @@
 
     <UserControl.Resources>
 
-        <SolidColorBrush Color="#1E1E25" x:Key="TbBackgroundColor"/>
+        <SolidColorBrush Color="#303234" x:Key="TbBackgroundColor"/>
         <SolidColorBrush Color="#FFFFFF" x:Key="TbForegroundColor"/>
 
         <Style TargetType="TextBox" x:Key="TextBoxStyle">
@@ -125,6 +125,59 @@
             </Setter>
         </Style>
 
+        <Style TargetType="Button" x:Key="RegisterButton">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                CornerRadius="4"
+                                Width="{TemplateBinding Width}"
+                                Height="{TemplateBinding Height}">
+                            <Border.Background>
+                                <SolidColorBrush Color="#7837DF" x:Name="BorderBackground"/>
+                            </Border.Background>
+
+                            <TextBlock Text="Register"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Foreground="White"
+                                       Padding="0,2,0,0"
+                                       FontSize="14"
+                                       FontFamily="SegoeFluentIcon"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+
+                            <EventTrigger RoutedEvent="Border.MouseEnter"
+                                          SourceName="border">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <ColorAnimation Storyboard.TargetName="BorderBackground"
+                                                        Storyboard.TargetProperty="Color"
+                                                        From="#6222C3"
+                                                        To="#6A28CF"
+                                                        Duration="0:0:0.1"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+
+                            <EventTrigger RoutedEvent="Border.MouseLeave"
+                                          SourceName="border">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <ColorAnimation Storyboard.TargetName="BorderBackground"
+                                                        Storyboard.TargetProperty="Color"
+                                                        From="#6A28CF"
+                                                        To="#6222C3"
+                                                        Duration="0:0:0.1"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
     </UserControl.Resources>
 
     <Grid>
@@ -140,23 +193,31 @@
             <!--Logo-->
             <Image Source="C:\Users\user\Pictures\Design\AppIcons\Financebox\FinanceboxIcon.png" Width="100"/>
 
-            <!--Google Auth-->
+            <!--Login-->
             <TextBox Style="{DynamicResource TextBoxStyle}" 
                      Tag="Login"
                      Width="290"
                      Height="38"
-                     Text="{Binding GoogleAuth}"
+                     Text="{Binding Login}"
                      Margin="0,22,0,0"/>
 
-            <!--Google Auth button-->
-            <Button Style="{DynamicResource TwoFactorAuthButton}"
-                    Command="{Binding RegisterGoogleAuthCommand}"
+            <!--Password-->
+            <TextBox Style="{DynamicResource TextBoxStyle}" 
+                     Tag="Password"
+                     Width="290"
+                     Height="38"
+                     Text="{Binding Password}"
+                     Margin="0,10,0,0"/>
+
+            <!--Register button-->
+            <Button Style="{DynamicResource RegisterButton}"
+                    Command="{Binding RegisterCommand}"
                     Margin="0,18,0,0"
                     Width="290"
                     Height="38"/>
 
-            <!--Registration button-->
-            <Button Command="{Binding NavigateToRegistrationCommand}"
+            <!--Navigate to login button-->
+            <Button Command="{Binding NavigateToLoginCommand}"
                     Content="Do not have account? Register"
                     Background="Transparent" BorderThickness="0" 
                     HorizontalAlignment="Center" 

@@ -1,8 +1,16 @@
-﻿using PasswordBox.Core;
+﻿using Microsoft.Toolkit.Uwp.Notifications;
+using PasswordBox.Core;
+using PasswordBox.Interfaces.GoogleAuth;
+using PasswordBox.Interfaces.Notifications;
+using PasswordBox.Interfaces.Repositories;
 using PasswordBox.MVVM.Model;
+using PasswordBox.MVVM.Model.AppContext;
 using PasswordBox.MVVM.Model.Entities;
+using PasswordBox.MVVM.Model.GoogleAuthentificator;
+using PasswordBox.MVVM.Model.Repositories;
 using PasswordBox.MVVM.Model.Validators;
 using PasswordBox.Services;
+using System.Configuration;
 using System.Windows;
 using System.Windows.Input;
 
@@ -10,12 +18,18 @@ namespace PasswordBox.MVVM.ViewModel
 {
     internal class LoginViewModel : Core.ViewModel
     {
-        private UserLoginValidator _userValidator;
+        private readonly UserLoginValidator _userLoginValidator;
+        private readonly IUserRepository _userRepository;
+        private readonly IGoogleAuthenticatorService _googleAuthenticatorService; 
+        private readonly INotificationService _notificationService;
 
         public LoginViewModel(INavigationService navigation)
         {
             Navigation = navigation;
-            _userValidator = new UserLoginValidator();
+            _userRepository = new UserRepository(new ApplicationContext());
+            _userLoginValidator = new UserLoginValidator();
+            _googleAuthenticatorService = new GoogleAuthenticatorService();
+            _notificationService = new ToastNotificationService();
 
             LoginCommand = new RelayCommand(LogIn);
             NavigateToRegistrationCommand = new RelayCommand(NavigateToRegistration);
@@ -37,6 +51,13 @@ namespace PasswordBox.MVVM.ViewModel
             set { _login = value; OnPropertyChanged(); }
         }
 
+        private string _password;
+        public string Password
+        {
+            get { return _password; }
+            set { _password = value; OnPropertyChanged(); }
+        }
+
         private string _twoFactorCode;
         public string TwoFactorCode
         {
@@ -53,33 +74,35 @@ namespace PasswordBox.MVVM.ViewModel
 
         private async void LogIn(object obj)
         {
-            // Валидация пользователя (проверка на правильность ввода полей
-            // и на существование пользователя)
-            User user = new(Login);
-            var result = await _userValidator.ValidateAsync(user);
+            if (string.IsNullOrEmpty(TwoFactorCode))
+            {
+                MessageBox.Show("Please enter two factor code.");
+                return;
+            }
+
+            // Проверка на secretKey необязательна
+            // поскольку secret key не может быть как-либо изменен или неправильно введен пользователем
+            User user = new(Login, Password);
+            var result = await _userLoginValidator.ValidateAsync(user);
+
             if (!result.IsValid)
             {
                 ErrorDisplay.ShowValidationErrorMessage(result.Errors);
                 return;
             }
-
-            if (string.IsNullOrEmpty(TwoFactorCode))
-            {
-                MessageBox.Show("Enter two factor code.");
-                return;
-            }
-
-            // Валидация Two Factor Code
-            GoogleAuth googleAuth = new();
-            if(!googleAuth.Validate(Login, TwoFactorCode))
+        
+            if(!_googleAuthenticatorService.Validate(user.SecretKey, TwoFactorCode))
             {
                 MessageBox.Show("Invalid two factor code.");
                 return;
             }
 
-            // Перенаправление на страницу с паролями и отправка уведомления
             Navigation.NavigateTo<PasswordsViewModel>();
-            NotificationService.SendWelcomeNotification(Login);
+
+            _notificationService.Send(new ToastContentBuilder()
+                .AddText($"Hello {Login}!")
+                .AddText("Login successfully completed")
+                .AddAppLogoOverride(new Uri(ConfigurationManager.AppSettings.Get("defaultNotificationLogo") ?? ""), ToastGenericAppLogoCrop.Circle));
         }
         private void NavigateToRegistration(object obj)
         {
