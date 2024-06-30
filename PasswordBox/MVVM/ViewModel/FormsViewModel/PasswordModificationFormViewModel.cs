@@ -7,13 +7,14 @@ using PasswordBox.Enums;
 using PasswordBox.MVVM.Model.Validators;
 using PasswordBox.MVVM.Model.Repositories;
 using PasswordBox.MVVM.Model.AppContext;
+using PasswordBox.Interfaces.Repositories;
 
 namespace PasswordBox.MVVM.ViewModel.FormsViewModel
 {
     internal class PasswordModificationFormViewModel : Core.ViewModel
     {
         private readonly PasswordValidator _passwordValidator;
-        private readonly PasswordRepository _passwordRepository;
+        private readonly IPasswordRepository _passwordRepository;
 
         // Add
         public PasswordModificationFormViewModel(ActionWithData action)
@@ -23,7 +24,7 @@ namespace PasswordBox.MVVM.ViewModel.FormsViewModel
 
             Action = action;
             _passwordValidator = new();
-            _passwordRepository = new(new ApplicationContext());
+            _passwordRepository = new PasswordRepository(new ApplicationContext());
 
             CloseCommand = new RelayCommand(Close);
             MinimizeCommand = new RelayCommand(Minimize);
@@ -39,7 +40,7 @@ namespace PasswordBox.MVVM.ViewModel.FormsViewModel
 
             Action = action;
             _passwordValidator = new();
-            _passwordRepository = new(new ApplicationContext());
+            _passwordRepository = new PasswordRepository(new ApplicationContext());
 
             Id = password.Id;
             Title = password.Title;
