@@ -1,4 +1,6 @@
-﻿using Microsoft.Toolkit.Uwp.Notifications;
+﻿using FluentValidation;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions;
+using Microsoft.Toolkit.Uwp.Notifications;
 using PasswordBox.Core;
 using PasswordBox.Interfaces.GoogleAuth;
 using PasswordBox.Interfaces.Notifications;
@@ -18,7 +20,7 @@ namespace PasswordBox.MVVM.ViewModel
 {
     internal class LoginViewModel : Core.ViewModel
     {
-        private readonly UserLoginValidator _userLoginValidator;
+        private readonly UserSignInValidator _userSignInValidator;
         private readonly IUserRepository _userRepository;
         private readonly IGoogleAuthenticatorService _googleAuthenticatorService; 
         private readonly INotificationService _notificationService;
@@ -27,7 +29,7 @@ namespace PasswordBox.MVVM.ViewModel
         {
             Navigation = navigation;
             _userRepository = new UserRepository(new ApplicationContext());
-            _userLoginValidator = new UserLoginValidator();
+            _userSignInValidator = new UserSignInValidator();
             _googleAuthenticatorService = new GoogleAuthenticatorService();
             _notificationService = new ToastNotificationService();
 
@@ -74,16 +76,56 @@ namespace PasswordBox.MVVM.ViewModel
 
         private async void LogIn(object obj)
         {
+            if (string.IsNullOrEmpty(Login))
+            {
+                MessageBox.Show("Please enter your login.");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(Password))
+            {
+                MessageBox.Show("Please enter your password.");
+                return;
+            }
+
             if (string.IsNullOrEmpty(TwoFactorCode))
             {
                 MessageBox.Show("Please enter two factor code.");
                 return;
             }
 
-            // Проверка на secretKey необязательна
-            // поскольку secret key не может быть как-либо изменен или неправильно введен пользователем
-            User user = new(Login, Password);
-            var result = await _userLoginValidator.ValidateAsync(user);
+            User? userFromDb = null;
+            try
+            {
+                // Получение пользователя из бд для получения его secret key 
+                userFromDb = await _userRepository.GetByAsync(u => u.Login == Login);
+                ArgumentNullException.ThrowIfNull(userFromDb);
+            }
+            catch (ArgumentNullException)
+            { 
+                MessageBox.Show("User with this login does not exist.");
+                return;
+            }
+            catch (Exception e)
+            {
+                dynamic ex = e;
+                ExceptionsLogger.Handle(ex);
+                MessageBox.Show("Failed to login user.");
+                return;
+            }
+
+            User user;
+            try
+            {
+                user = new(Login, Password, userFromDb.SecretKey);
+            }
+            catch (ValidationException ex)
+            {
+                Messagebox.Show(ex.Message);
+                return;
+            }
+
+            var result = await _userSignInValidator.ValidateAsync(user);
 
             if (!result.IsValid)
             {
