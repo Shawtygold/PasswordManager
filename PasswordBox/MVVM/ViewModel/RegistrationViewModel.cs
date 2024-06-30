@@ -1,4 +1,5 @@
-﻿using Microsoft.Toolkit.Uwp.Notifications;
+﻿using FluentValidation;
+using Microsoft.Toolkit.Uwp.Notifications;
 using PasswordBox.Core;
 using PasswordBox.Interfaces.GoogleAuth;
 using PasswordBox.Interfaces.Notifications;
@@ -21,7 +22,7 @@ namespace PasswordBox.MVVM.ViewModel
     internal class RegistrationViewModel : Core.ViewModel
     {
         private readonly string _appName = ConfigurationManager.AppSettings.Get("AppName") ?? "PasswordBox";
-        private readonly UserValidator _userValidator; 
+        private readonly UserSignUpValidator _userSignUpValidator; 
         private readonly IUserRepository _userRepository;
         private readonly IGoogleAuthenticatorService _googleAuthenticatorService;
         private readonly ISecretKeyGenerator _secretKeyGenerator;
@@ -30,7 +31,7 @@ namespace PasswordBox.MVVM.ViewModel
         public RegistrationViewModel(INavigationService navigation)
         {
             Navigation = navigation;
-            _userValidator = new UserValidator();
+            _userSignUpValidator = new UserSignUpValidator();
             _userRepository = new UserRepository(new ApplicationContext());
             _googleAuthenticatorService = new GoogleAuthenticatorService();
             _secretKeyGenerator = new SecretKeyGenerator();
@@ -71,6 +72,18 @@ namespace PasswordBox.MVVM.ViewModel
         public ICommand NavigateToLoginCommand { get; set; }
         private async void Register(object obj)
         {
+            if (string.IsNullOrEmpty(Login))
+            {
+                MessageBox.Show("Please enter your login.");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(Password))
+            {
+                MessageBox.Show("Please enter your password.");
+                return;
+            }
+
             string secretKey = _secretKeyGenerator.GenerateKey(Login);
             string manualEntryKey = _googleAuthenticatorService.GetManualKey(_appName, Login, secretKey);
             BitmapSource qrCode = _googleAuthenticatorService.GetQrCode(_appName, Login, secretKey);
@@ -80,9 +93,19 @@ namespace PasswordBox.MVVM.ViewModel
             form.DataContext = new QrCodeFormViewModel(qrCode, manualEntryKey);
             form.ShowDialog();
 
-            // Валидация пользователя
-            User user = new(Login, Password, secretKey);
-            var result = await _userValidator.ValidateAsync(user);
+            User user;
+            try
+            {
+                user = new(Login, Password, secretKey);
+            }
+            catch (ValidationException ex)
+            {
+                Messagebox.Show(ex.Message);
+                return;
+            }
+
+            var result = _userSignUpValidator.Validate(user);
+
             if (!result.IsValid)
             {
                 ErrorDisplay.ShowValidationErrorMessage(result.Errors);
