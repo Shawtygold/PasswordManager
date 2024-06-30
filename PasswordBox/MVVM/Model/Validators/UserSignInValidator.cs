@@ -1,25 +1,21 @@
 ﻿using FluentValidation;
-using PasswordBox.Interfaces.Repositories;
 using PasswordBox.MVVM.Model.AppContext;
 using PasswordBox.MVVM.Model.Entities;
 using PasswordBox.MVVM.Model.Repositories;
 
 namespace PasswordBox.MVVM.Model.Validators
 {
-    internal class UserRegistrationValidator : UserValidator
+    internal class UserSignInValidator : AbstractValidator<User>
     {
-        public UserRegistrationValidator() : base()
+        public UserSignInValidator()
         {
-            RuleFor(u => u.Login).CustomAsync(async (login, context, cancellation) =>
+            RuleFor(u => u.Login).NotNull().CustomAsync(async (login, context, cancellationToken) =>
             {
-                if (string.IsNullOrEmpty(login))
-                    return;
-
                 User? dbUser = null;
-                using (IUserRepository userRepository = new UserRepository(new ApplicationContext()))
+                using (UserRepository userRepository = new(new ApplicationContext()))
                 {
                     try
-                    {   // Получение пользователя из бд по логину
+                    {
                         dbUser = await userRepository.GetByAsync(u => u.Login == login);
                     }
                     catch (Exception e)
@@ -31,8 +27,17 @@ namespace PasswordBox.MVVM.Model.Validators
                     }
                 }
 
-                if (dbUser != null)
-                    context.AddFailure("User with this login already exists.");
+                if (dbUser == null)
+                {
+                    context.AddFailure("User with this login does not exist.");
+                    return;
+                }
+
+                if (context.InstanceToValidate.Password != dbUser.Password)
+                {
+                    context.AddFailure("Incorrect password.");
+                    return;
+                }
             });
         }
     }
