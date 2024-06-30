@@ -140,13 +140,21 @@
             <!--Logo-->
             <Image Source="C:\Users\user\Pictures\Design\AppIcons\Financebox\FinanceboxIcon.png" Width="100"/>
 
-            <!--Google Auth-->
+            <!--Login-->
             <TextBox Style="{DynamicResource TextBoxStyle}" 
                      Tag="Login"
                      Width="290"
                      Height="38"
                      Text="{Binding Login}"
                      Margin="0,22,0,0"/>
+
+            <!--Password-->
+            <TextBox Style="{DynamicResource TextBoxStyle}" 
+                     Tag="Password"
+                     Width="290"
+                     Height="38"
+                     Text="{Binding Password}"
+                     Margin="0,10,0,0"/>
 
             <!--Google Auth-->
             <TextBox Style="{DynamicResource TextBoxStyle}" 
