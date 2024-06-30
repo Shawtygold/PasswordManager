@@ -33,8 +33,8 @@ namespace PasswordBox.MVVM.ViewModel
             _googleAuthenticatorService = new GoogleAuthenticatorService();
             _notificationService = new ToastNotificationService();
 
-            LoginCommand = new RelayCommand(LogIn);
-            NavigateToRegistrationCommand = new RelayCommand(NavigateToRegistration);
+            SignInCommand = new RelayCommand(SignIn);
+            NavigateToSignUpCommand = new RelayCommand(NavigateToSignUp);
         }
 
         #region Properties
@@ -71,10 +71,10 @@ namespace PasswordBox.MVVM.ViewModel
 
         #region Commands
 
-        public ICommand LoginCommand { get; set; }
-        public ICommand NavigateToRegistrationCommand { get; set; }
+        public ICommand SignInCommand { get; set; }
+        public ICommand NavigateToSignUpCommand { get; set; }
 
-        private async void LogIn(object obj)
+        private async void SignIn(object obj)
         {
             if (string.IsNullOrEmpty(Login))
             {
@@ -146,7 +146,7 @@ namespace PasswordBox.MVVM.ViewModel
                 .AddText("Login successfully completed")
                 .AddAppLogoOverride(new Uri(ConfigurationManager.AppSettings.Get("defaultNotificationLogo") ?? ""), ToastGenericAppLogoCrop.Circle));
         }
-        private void NavigateToRegistration(object obj)
+        private void NavigateToSignUp(object obj)
         {
             Navigation.NavigateTo<RegistrationViewModel>();
         }

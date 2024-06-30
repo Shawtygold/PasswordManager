@@ -37,8 +37,8 @@ namespace PasswordBox.MVVM.ViewModel
             _secretKeyGenerator = new SecretKeyGenerator();
             _notificationService = new ToastNotificationService();
 
-            RegisterCommand = new RelayCommand(Register);
-            NavigateToLoginCommand = new RelayCommand(NavigateToLogin);
+            SignUpCommand = new RelayCommand(SignUp);
+            NavigateToSignInCommand = new RelayCommand(NavigateToSignIn);
         }
 
         #region Properties
@@ -68,9 +68,9 @@ namespace PasswordBox.MVVM.ViewModel
 
         #region Commands
 
-        public ICommand RegisterCommand { get; set; }
-        public ICommand NavigateToLoginCommand { get; set; }
-        private async void Register(object obj)
+        public ICommand SignUpCommand { get; set; }
+        public ICommand NavigateToSignInCommand { get; set; }
+        private async void SignUp(object obj)
         {
             if (string.IsNullOrEmpty(Login))
             {
@@ -131,7 +131,7 @@ namespace PasswordBox.MVVM.ViewModel
 
             Navigation.NavigateTo<LoginViewModel>();
         }
-        private void NavigateToLogin(object obj)
+        private void NavigateToSignIn(object obj)
         {
             Navigation.NavigateTo<LoginViewModel>();
         }
